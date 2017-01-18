@@ -46,7 +46,7 @@ def enter_image(my_value_guid, my_item, my_image_name, my_order):
     cursor.execute(query)
     cnx.commit()
     cursor.close()
-reader = csv.DictReader(open('import.csv'))
+reader = csv.DictReader(open('Import.csv'))
 for row in reader:
     category_guid = get_object_id(row['Category'],'Category')
     catalog_guid = get_object_id(row['Catalog'],'Catalog')
@@ -97,6 +97,17 @@ for row in reader:
     "Title, MetaDescription, ImageAltDescription, StoreId) "
     "values('" + seo_guid + "','en-US','" + str(row['Name']).replace(' ', '-').lower() + "',0,'" + str(today) + "','" + str(today) + "'," + "'admin','admin','"
     + image_guid + "','CatalogProduct','" + strTitle + "','" + strDesc + "','" + strImgAlt + "','koda')")
+    cursor.execute(query)
+    cnx.commit()
+    cursor.close()
+    #Enter the price list prices
+    item_guid = str(row['ItemId'])
+    price_guid = str(get_uid()).replace('-','')
+    #price_list_guid = 'd05a81dfc72f46f9b2c0637764243999'
+    price_list_guid = str(row['PriceListId'])
+    cursor = cnx.cursor()
+    query = ("Insert into Price(Id, List, ProductId, MinQuantity, PriceListId, CreatedDate, ModifiedDate, CreatedBy, ModifiedBy) "
+    "values('" + price_guid + "','" + str(row['Price']) + "','" + item_guid + "','1.00','" + price_list_guid + "','" + str(today) + "','" +  str(today) + "'," + "'admin','admin')")
     cursor.execute(query)
     cnx.commit()
     cursor.close()
