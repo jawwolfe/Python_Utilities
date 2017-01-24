@@ -1,5 +1,7 @@
 '''
 To import need to enter variation data into four tables:  1) new item ; 2) new PropertyValues; 3) new CatalogImages; 4) new SEOUrlKeywords;
+Assumes a main product and price list already created and includes those GUIDs in the import data.
+Handles up to four images per variation.
 
 '''
 import pyodbc, uuid, csv, datetime
@@ -46,7 +48,7 @@ def enter_image(my_value_guid, my_item, my_image_name, my_order):
     cursor.execute(query)
     cnx.commit()
     cursor.close()
-reader = csv.DictReader(open('Import.csv'))
+reader = csv.DictReader(open('Import-EC7000-Caps.csv'))
 for row in reader:
     category_guid = get_object_id(row['Category'],'Category')
     catalog_guid = get_object_id(row['Catalog'],'Catalog')
@@ -55,11 +57,15 @@ for row in reader:
     size_guid = get_property_id("Variation", "size", row['size'])
     #remove hyphen from guid to match db guids format
     item_guid = str(get_uid()).replace('-','')
+    #name wo out size for non sized items
+    name_long = str(row['Name']) + ' ' + str(row['color'])
+    # name with size for sized items
+    #name_long = str(row['Name']) + ' ' + str(row['size']) + ' ' + str(row['color'])
     #Enter the Item
     cursor = cnx.cursor()
     query = ("Insert into Item(Id, Name, StartDate, IsActive, IsBuyable, AvailabilityRule, MinQuantity, MaxQuantity, TrackInventory, Code, "
              "CatalogId, CreatedDate, ModifiedDate, CreatedBy, ModifiedBy, ParentId, ProductType, CategoryId, Priority) "
-             "values('" + item_guid + "','" + str(row['Name']) + "','" + str(today) + "',1,1,0,'1.00','0.00',1,'" + str(row['Sku']) + "','" + str(catalog_guid)
+             "values('" + item_guid + "','" + name_long + "','" + str(today) + "',1,1,0,'1.00','0.00',1,'" + str(row['Sku']) + "','" + str(catalog_guid)
              + "','" + str(today) + "','" + str(today) + "'," + "'admin','admin'" + ",'" + str(row['MainProductId']) + "','Physical','" + str(category_guid)
              + "',0)")
     cursor.execute(query)
@@ -101,7 +107,7 @@ for row in reader:
     cnx.commit()
     cursor.close()
     #Enter the price list prices
-    item_guid = str(row['ItemId'])
+    #item_guid = str(row['ItemId'])
     price_guid = str(get_uid()).replace('-','')
     #price_list_guid = 'd05a81dfc72f46f9b2c0637764243999'
     price_list_guid = str(row['PriceListId'])
