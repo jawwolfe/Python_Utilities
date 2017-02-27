@@ -64,4 +64,9 @@ for database in databases:
     zip.close()
     upload_file(ftp_conn, myzip.replace('\\','/'))
 
+#clean up by removing all zip files after ftp to backup server
+filelist = [ f for f in os.listdir(path) if f.endswith(".zip") ]
+for f in filelist:
+    os.remove(path + f)
+
 print("success")
